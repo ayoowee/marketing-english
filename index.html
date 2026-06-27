@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="营销英语">
+<meta name="theme-color" content="#F7F6F3">
+<link rel="manifest" href="manifest.json">
+<title>营销英语私教</title>
+<style>
+  :root{
+    --bg:#F7F6F3; --surface:#FFFFFF; --surface2:#FBFAF8;
+    --line:#E9E6DF; --line2:#EEEBE4;
+    --txt:#23211E; --sub:#7A7770; --faint:#A4A199;
+    --accent:#C15F3C; --accent-soft:#F4ECE7; --good:#3F7D5C; --bad:#C0492F;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI","Helvetica Neue",sans-serif;
+    -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.6}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .wrap{max-width:520px;margin:0 auto;padding:8px 18px 0}
+  header{max-width:520px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 18px 6px;
+    display:flex;align-items:baseline;gap:8px}
+  header h1{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+  header .sub{font-size:12px;color:var(--faint);font-weight:400}
+  .page{display:none}
+  .page.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+  .card h2{font-size:15px;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+  .muted{color:var(--sub);font-size:13.5px;line-height:1.65}
+  .row{display:flex;align-items:center;gap:10px}
+  .between{justify-content:space-between}
+  .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--sub);border:1px solid var(--line)}
+  .pill.acc{color:var(--accent);background:var(--accent-soft);border-color:#EAD9D0}
+  .pill.g{color:var(--good);border-color:#D5E5DC;background:#F0F6F2}
+  .pill.lv{font-weight:600}
+
+  button{font-family:inherit;cursor:pointer;border:none;outline:none}
+  .btn{background:var(--accent);color:#fff;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:500;width:100%;margin-top:6px;transition:opacity .15s}
+  .btn:active{opacity:.75}
+  .btn.ghost{background:var(--surface);color:var(--txt);border:1px solid var(--line)}
+  .btn.sm{width:auto;padding:8px 13px;font-size:13px;margin-top:0;font-weight:500}
+  .btn:disabled{opacity:.4}
+  .ico{width:34px;height:34px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;color:var(--sub);font-weight:600}
+  .ico.acc{background:var(--accent-soft);border-color:#EAD9D0;color:var(--accent)}
+
+  /* progress bar */
+  .bar{height:8px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar > i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .4s}
+
+  /* task list */
+  .task{display:flex;gap:13px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line2)}
+  .task:last-child{border-bottom:none}
+  .task .chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;background:#fff}
+  .task.done .chk{background:var(--good);border-color:var(--good)}
+  .task.done .t{color:var(--faint);text-decoration:line-through}
+  .task .t{font-size:14px;font-weight:500}
+  .task .d{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .task .arrow{margin-left:auto;color:var(--faint);font-size:18px}
+
+  /* flashcard */
+  .deck{perspective:1200px}
+  .flip{position:relative;height:240px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flip.on{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+  .face.back{transform:rotateY(180deg);background:var(--surface2)}
+  .face .en{font-size:24px;font-weight:600;letter-spacing:-.01em}
+  .face .ph{font-size:13px;color:var(--faint);margin-top:6px}
+  .face .pos{font-size:11px;color:var(--accent);margin-top:4px}
+  .face .cn{font-size:18px;font-weight:600;color:var(--accent);padding:0 6px}
+  .face .ex{font-size:13px;color:var(--sub);margin-top:12px;line-height:1.55}
+  .face .note{font-size:11.5px;color:var(--bad);margin-top:10px;background:#FBF0EC;border:1px solid #F0DBD3;border-radius:8px;padding:6px 9px}
+  .deck-bar{display:flex;gap:10px;margin-top:14px}
+  .deck-bar .btn{margin-top:0}
+  .cat-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+  .cat-tabs::-webkit-scrollbar{display:none}
+  .cat-tabs button{flex:0 0 auto;background:var(--surface);border:1px solid var(--line);color:var(--sub);border-radius:999px;padding:7px 14px;font-size:13px}
+  .cat-tabs button.on{background:var(--txt);color:#fff;border-color:var(--txt)}
+  .prog-dot{font-size:12px;color:var(--faint);text-align:center;margin-top:12px}
+
+  /* quiz */
+  .qprompt{font-size:22px;font-weight:600;text-align:center;padding:24px 10px 6px}
+  .qsub{font-size:12px;color:var(--faint);text-align:center;margin-bottom:16px}
+  .opt{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14.5px;margin-bottom:10px;color:var(--txt)}
+  .opt.correct{background:#F0F6F2;border-color:var(--good);color:var(--good);font-weight:600}
+  .opt.wrong{background:#FBF0EC;border-color:var(--bad);color:var(--bad)}
+  .opt:disabled{opacity:1}
+  .qbar{font-size:12px;color:var(--sub);text-align:center;margin-bottom:6px}
+
+  /* dialogue */
+  .line{display:flex;gap:10px;padding:12px 13px;border-radius:12px;margin-bottom:8px;background:var(--surface);border:1px solid var(--line)}
+  .line.key{background:var(--accent-soft);border-color:#EAD9D0}
+  .line .who{font-size:11px;color:var(--faint);font-weight:600;flex:0 0 42px;padding-top:2px;text-transform:uppercase;letter-spacing:.03em}
+  .line.key .who{color:var(--accent)}
+  .line .en{font-size:14px;line-height:1.5}
+  .line .cn{font-size:12.5px;color:var(--sub);margin-top:3px}
+  .line .play{margin-left:auto;font-size:15px;background:none;color:var(--accent);flex:0 0 auto;padding:2px}
+
+  .list-item{display:flex;gap:13px;align-items:center;padding:15px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px}
+  .list-item:active{background:var(--surface2)}
+  .list-item .t{font-size:14px;font-weight:500}
+  .list-item .d{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .list-item .arrow{margin-left:auto;color:var(--faint);font-size:18px}
+  .back-link{color:var(--accent);font-size:13.5px;background:none;padding:0;margin-bottom:14px}
+
+  .phrase{padding:13px 0;border-bottom:1px solid var(--line2)}
+  .phrase:last-child{border-bottom:none;padding-bottom:0}
+  .phrase .en{font-size:14px;font-weight:500;padding-right:28px}
+  .phrase .cn{font-size:12.5px;color:var(--sub);margin-top:3px}
+  .phrase .play{float:right;color:var(--accent);background:none;font-size:15px;padding:2px}
+
+  .big-stat{font-size:34px;font-weight:700;color:var(--txt);letter-spacing:-.02em;line-height:1.1}
+  .stat-grid{display:flex;gap:12px}
+  .stat-grid .card{flex:1;text-align:center;margin-bottom:0;padding:16px 10px}
+  pre.tpl{white-space:pre-wrap;font-size:12.5px;line-height:1.65;background:var(--surface2);border:1px solid var(--line);border-radius:11px;padding:13px;color:var(--txt);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+  input[type=range]{accent-color:var(--accent)}
+
+  /* milestone map */
+  .ms{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line2)}
+  .ms:last-child{border-bottom:none}
+  .ms .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;margin-top:3px;background:#fff}
+  .ms.done .dot{background:var(--good);border-color:var(--good)}
+  .ms.cur .dot{background:var(--accent);border-color:var(--accent)}
+  .ms .lab{font-size:11px;color:var(--faint);font-weight:600}
+  .ms.cur .lab{color:var(--accent)}
+  .ms .tt{font-size:14px;font-weight:600;margin-top:1px}
+  .ms .tg{font-size:12.5px;color:var(--sub);margin-top:2px}
+
+  nav{position:fixed;bottom:0;left:0;right:0;background:rgba(247,246,243,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:50}
+  nav button{flex:1;background:none;color:var(--faint);font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:3px;font-weight:500}
+  nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  nav button.on{color:var(--accent)}
+  .toast{position:fixed;bottom:94px;left:50%;transform:translateX(-50%);background:var(--txt);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .25s;z-index:99;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.12);max-width:84%;text-align:center}
+  .toast.show{opacity:1}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header><h1>营销英语私教</h1><span class="sub">Brand · Marketing · Negotiation</span></header>
+
+<!-- ===== 今日 ===== -->
+<div class="page active" id="p-today"><div class="wrap" id="todayWrap"></div></div>
+
+<!-- ===== 词汇 ===== -->
+<div class="page" id="p-vocab"><div class="wrap">
+  <div id="vocabHub"></div>
+  <div id="drillHost" style="display:none"></div>
+</div></div>
+
+<!-- ===== 口语 ===== -->
+<div class="page" id="p-speak"><div class="wrap">
+  <div id="speakList"></div>
+  <div id="speakDetail" style="display:none"></div>
+</div></div>
+
+<!-- ===== 谈判 ===== -->
+<div class="page" id="p-nego"><div class="wrap" id="negoWrap"></div></div>
+
+<!-- ===== 我的 ===== -->
+<div class="page" id="p-me"><div class="wrap" id="meWrap"></div></div>
+
+<nav>
+ <button class="on" data-p="today" onclick="go('today')"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>今日</button>
+ <button data-p="vocab" onclick="go('vocab')"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="12" rx="2.5"/><path d="M6.5 20h11"/></svg>词汇</button>
+ <button data-p="speak" onclick="go('speak')"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-4 3.5v-3.5H4z"/></svg>口语</button>
+ <button data-p="nego" onclick="go('nego')"><svg viewBox="0 0 24 24"><path d="M3 11l5-1 4 2 4-2 5 1M4 11v6a2 2 0 002 2h12a2 2 0 002-2v-6"/></svg>谈判</button>
+ <button data-p="me" onclick="go('me')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/></svg>我的</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="vocab2.js"></script>
+<script src="scripts.js"></script>
+<script>
+/* ===== 存储 ===== */
+const LS={get:(k,d)=>{try{const v=localStorage.getItem('me_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>localStorage.setItem('me_'+k,JSON.stringify(v))};
+let rate=LS.get('rate',0.85);
+let DAILY_NEW=LS.get('dailyNew',20); const REVIEW_N=10;
+
+/* ===== 工具 ===== */
+function dayKey(d){d=d||new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function yesterKey(){return dayKey(new Date(Date.now()-864e5));}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function byWord(w){return VOCAB.find(v=>v.w===w);}
+function speak(t){if(!t)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=rate;const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));if(vs.length)u.voice=vs.find(v=>/Samantha|US|United States/i.test(v.name))||vs[0];speechSynthesis.speak(u);}catch(e){toast('此浏览器不支持朗读')}}
+if('speechSynthesis'in window)speechSynthesis.onvoiceschanged=()=>{};
+let tT;function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>e.classList.remove('show'),2000);}
+
+/* ===== 数据访问 ===== */
+function getLearned(){return LS.get('learned',{});}            // {w:{d,wrong}}
+function getMistV(){return LS.get('mistV',{});}                // 错题本-词汇 {w:true}
+function getMistN(){return LS.get('mistN',{});}                // 错题集-谈判 {enText:true}
+function learnedCount(){return Object.keys(getLearned()).length;}
+function todayNewWords(){
+ const st=LS.get('todaySet',null), tk=dayKey();
+ if(st&&st.key===tk)return st.words.map(byWord).filter(Boolean);
+ const learned=getLearned();
+ const pick=VOCAB.filter(v=>!learned[v.w]).slice(0,DAILY_NEW);
+ LS.set('todaySet',{key:tk,words:pick.map(v=>v.w)});
+ return pick;
+}
+function learnedList(){const l=getLearned();return VOCAB.filter(v=>l[v.w]);}
+
+/* ===== 导航 ===== */
+function go(p){
+ document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+ document.getElementById('p-'+p).classList.add('active');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+ window.scrollTo(0,0);
+ if(p==='today')renderToday();
+ if(p==='vocab')showVocabHub();
+ if(p==='nego')renderNego();
+ if(p==='me')renderMe();
+}
+
+/* ===== 里程碑 ===== */
+function curMilestone(){const c=learnedCount();return MILESTONES.find(m=>c<m.words)||MILESTONES[MILESTONES.length-1];}
+function milestoneHTML(){
+ const c=learnedCount(),m=curMilestone();
+ const idx=MILESTONES.indexOf(m), prev=idx>0?MILESTONES[idx-1].words:0;
+ const pct=Math.min(100,Math.round((c-prev)/(m.words-prev)*100));
+ return `<div class="card">
+  <div class="row between"><h2 style="margin:0">目标 · ${m.label}：${m.title}</h2><span class="pill acc">已学 ${c} 词</span></div>
+  <div class="muted" style="margin-top:6px">${m.target}</div>
+  <div class="bar"><i style="width:${Math.max(4,pct)}%"></i></div>
+  <div class="muted" style="font-size:12px;margin-top:6px">距本阶段目标 ${m.words} 词还差 ${Math.max(0,m.words-c)} 词　·　<a onclick="go('me')">看完整学习地图</a></div>
+ </div>`;
+}
+
+/* ===== 今日 ===== */
+function renderToday(){
+ const tk=dayKey(), lastReview=LS.get('lastReview',''), learned=learnedCount();
+ const checkedToday=LS.get('checkedDay','')===tk;
+ const learnedToday=LS.get('learnedDay','')===tk;
+ const reviewToday=lastReview===tk;
+ const mv=Object.keys(getMistV()).length;
+ const newCnt=todayNewWords().length;
+ let tasks='';
+ // 复习抽查（有历史且今天没抽查）
+ if(learned>0){
+  tasks+=`<div class="task ${reviewToday?'done':''}" onclick="startReview()"><div class="chk">✓</div>
+   <div style="flex:1"><div class="t">复习抽查 ${Math.min(REVIEW_N,learned)} 个历史词</div><div class="d">${reviewToday?'今日已抽查':'次日抽查，第二次错的进错题本'}</div></div><div class="arrow">›</div></div>`;
+ }
+ // 学今日新词
+ tasks+=`<div class="task ${learnedToday?'done':''}" onclick="startLearn()"><div class="chk">✓</div>
+   <div style="flex:1"><div class="t">学今日 ${newCnt} 个新词</div><div class="d">${newCnt?'卡片逐个学，听发音':'今日新词已学完，明天继续'}</div></div><div class="arrow">›</div></div>`;
+ // 当日检查
+ tasks+=`<div class="task ${checkedToday?'done':''}" onclick="startDailyCheck()"><div class="chk">✓</div>
+   <div style="flex:1"><div class="t">当日检查（中英互译）</div><div class="d">${checkedToday?'今日已检查':'学完后做选择题，错的进错题本'}</div></div><div class="arrow">›</div></div>`;
+ // 口语
+ tasks+=`<div class="task" onclick="go('speak')"><div class="chk">✓</div>
+   <div style="flex:1"><div class="t">口语场景跟读</div><div class="d">7 个场景含方案讲解 / 复盘</div></div><div class="arrow">›</div></div>`;
+
+ document.getElementById('todayWrap').innerHTML=
+  milestoneHTML()+
+  `<div class="card"><div class="row between">
+     <div><div class="muted" style="margin-bottom:2px">连续学习</div><div class="row" style="align-items:baseline;gap:6px"><span class="big-stat" id="streakNum">${LS.get('streak',0)}</span><span class="muted">天</span></div></div>
+     <div onclick="startMistakes()" style="text-align:center;cursor:pointer"><div class="ico acc" style="width:46px;height:46px;border-radius:14px;font-size:18px;margin:0 auto">✕</div><div class="muted" style="font-size:11px;margin-top:4px">错题本 ${mv}</div></div>
+   </div></div>`+
+  `<div class="card"><h2>今日 30 分钟</h2><div class="muted" style="margin-bottom:4px">按顺序完成，点亮今天</div>${tasks}</div>`+
+  `<div class="card"><h2>想开口对话 / 练谈判？</h2><div class="muted">用手机 Claude App 语音模式，扮演老板 / 客户 / 达人陪你实战。</div><button class="btn ghost" style="margin-top:12px" onclick="go('me')">复制语音私教指令 →</button></div>`;
+}
+function markDayDone(){
+ const tk=dayKey(),last=LS.get('streakDay','');
+ if(last===tk)return;
+ let s=LS.get('streak',0); s=(last===yesterKey())?s+1:1;
+ LS.set('streak',s);LS.set('streakDay',tk);
+}
+
+/* ===== 词汇 Hub ===== */
+function showVocabHub(){
+ document.getElementById('drillHost').style.display='none';
+ const hub=document.getElementById('vocabHub');hub.style.display='block';
+ const learned=learnedCount(), mv=Object.keys(getMistV()).length, newCnt=todayNewWords().length;
+ let cats='';Object.keys(VOCAB.reduce((o,v)=>{o[v.cat]=1;return o;},{})).forEach(c=>{
+  cats+=`<button class="btn ghost sm" style="margin:0 8px 8px 0" onclick="startBrowse('${c}')">${c}</button>`;});
+ hub.innerHTML=
+  `<div class="list-item" onclick="startLearn()"><div class="ico acc">新</div><div style="flex:1"><div class="t">今日新词（${newCnt}）</div><div class="d">逐卡学习 + 听发音</div></div><div class="arrow">›</div></div>
+   <div class="list-item" onclick="startDailyCheck()"><div class="ico acc">查</div><div style="flex:1"><div class="t">当日检查</div><div class="d">今日 15 词中英互译选择题</div></div><div class="arrow">›</div></div>
+   <div class="list-item" onclick="startReview()"><div class="ico acc">习</div><div style="flex:1"><div class="t">复习抽查（${Math.min(REVIEW_N,learned)}）</div><div class="d">随机抽查历史词</div></div><div class="arrow">›</div></div>
+   <div class="list-item" onclick="startMistakes()"><div class="ico acc">✕</div><div style="flex:1"><div class="t">错题本（${mv}）</div><div class="d">专攻做错的词</div></div><div class="arrow">›</div></div>
+   <div class="card" style="margin-top:4px"><h2>按分类浏览</h2><div class="muted" style="margin-bottom:10px">共 ${VOCAB.length} 词 · 7 类 · 3 级</div>${cats}</div>`;
+}
+function drill(html){const h=document.getElementById('drillHost');document.getElementById('vocabHub').style.display='none';h.style.display='block';h.innerHTML=html;window.scrollTo(0,0);}
+
+/* ===== 学习：今日新词卡片 ===== */
+let learnSeq=[],learnIdx=0,learnFlip=false;
+function startLearn(){go('vocab');learnSeq=todayNewWords();if(!learnSeq.length){drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回</button><div class="card"><h2>今天的新词学完啦</h2><div class="muted">明天会自动安排新的 15 词。可以去「当日检查」或「复习抽查」。</div></div>`);return;}learnIdx=0;renderLearn();}
+function renderLearn(){
+ const w=learnSeq[learnIdx];learnFlip=false;
+ drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回词汇</button>
+  <div class="qbar">今日新词 ${learnIdx+1} / ${learnSeq.length}</div>
+  <div class="deck"><div class="flip" id="lflip" onclick="lflipCard()">
+   <div class="face front"><span class="pill lv">L${w.lv}</span><div class="en" style="margin-top:10px">${w.w}</div><div class="ph">${w.ph||''}</div>
+     <button class="btn ghost sm" style="margin-top:14px" onclick="event.stopPropagation();speak('${w.w.replace(/'/g,"")}')">▶ 听发音</button>
+     <div class="muted" style="margin-top:12px;font-size:12px;color:var(--faint)">点卡片看释义</div></div>
+   <div class="face back"><div class="pos">${w.pos}</div><div class="cn">${w.cn}</div><div class="ex">${w.ex}<br><span style="color:var(--faint)">${w.exCn}</span></div>${w.note?`<div class="note">⚠ ${w.note}</div>`:''}</div>
+  </div></div>
+  <div class="deck-bar"><button class="btn ghost" onclick="prevLearn()" ${learnIdx===0?'disabled':''}>上一个</button>
+   <button class="btn" onclick="nextLearn()">${learnIdx===learnSeq.length-1?'学完，去检查':'下一个'}</button></div>`);
+}
+function lflipCard(){learnFlip=!learnFlip;document.getElementById('lflip').classList.toggle('on',learnFlip);if(learnFlip)speak(learnSeq[learnIdx].w);}
+function prevLearn(){if(learnIdx>0){learnIdx--;renderLearn();}}
+function nextLearn(){
+ if(learnIdx<learnSeq.length-1){learnIdx++;renderLearn();return;}
+ // 学完：标记 learned
+ const l=getLearned();learnSeq.forEach(w=>{if(!l[w.w])l[w.w]={d:dayKey(),wrong:0};});LS.set('learned',l);LS.set('learnedDay',dayKey());
+ toast('今日新词学完！');startDailyCheck();
+}
+
+/* ===== 选择题引擎 ===== */
+// items: 词对象数组 -> 题目；onWrong(word) onDone(wrongArr)
+function vocabQuestions(words){
+ return shuffle(words).map(w=>{
+  const dir=Math.random()<0.5?'e2c':'c2e';
+  const pool=VOCAB.filter(v=>v.w!==w.w);
+  if(dir==='e2c'){const ds=shuffle(pool).slice(0,3).map(v=>v.cn);return{key:w.w,word:w,prompt:w.w,sub:w.ph+' · '+w.pos,correct:w.cn,opts:shuffle([w.cn,...ds]),say:w.w};}
+  else{const ds=shuffle(pool).slice(0,3).map(v=>v.w);return{key:w.w,word:w,prompt:w.cn,sub:'选出对应英文',correct:w.w,opts:shuffle([w.w,...ds]),say:w.w};}
+ });
+}
+function negoQuestions(pairs){ // pairs:[en,cn]
+ return shuffle(pairs).map(p=>{
+  const dir=Math.random()<0.5?'e2c':'c2e';const pool=pairs.filter(x=>x[0]!==p[0]);
+  if(dir==='e2c'){const ds=shuffle(pool).slice(0,3).map(x=>x[1]);return{key:p[0],prompt:p[0],sub:'选出中文意思',correct:p[1],opts:shuffle([p[1],...ds]),say:p[0]};}
+  else{const ds=shuffle(pool).slice(0,3).map(x=>x[0]);return{key:p[0],prompt:p[1],sub:'选出英文表达',correct:p[0],opts:shuffle([p[0],...ds]),say:p[0]};}
+ });
+}
+let quiz={list:[],i:0,wrong:[],onWrong:null,onDone:null,title:''};
+function startQuiz(list,title,onWrong,onDone){
+ if(!list.length){drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回</button><div class="card"><h2>${title}</h2><div class="muted">暂时没有可测的内容。先去学今日新词吧。</div></div>`);return;}
+ quiz={list,i:0,wrong:[],onWrong,onDone,title};renderQuiz();
+}
+function renderQuiz(){
+ const q=quiz.list[quiz.i];
+ drill(`<button class="back-link" onclick="showVocabHub()">‹ 退出</button>
+  <div class="qbar">${quiz.title} ${quiz.i+1} / ${quiz.list.length}</div>
+  <div class="card"><div class="qprompt">${q.prompt}</div><div class="qsub">${q.sub||''}</div>
+   <div id="opts">${q.opts.map((o,i)=>`<button class="opt" onclick="answer(${i})">${o}</button>`).join('')}</div></div>`);
+}
+function answer(i){
+ const q=quiz.list[quiz.i],btns=document.querySelectorAll('#opts .opt'),pick=q.opts[i];
+ btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.correct)b.classList.add('correct');if(j===i&&pick!==q.correct)b.classList.add('wrong');});
+ if(pick===q.correct){speak(q.say);}else{quiz.wrong.push(q.key);if(quiz.onWrong)quiz.onWrong(q.key);}
+ setTimeout(()=>{quiz.i++;if(quiz.i<quiz.list.length)renderQuiz();else finishQuiz();},pick===q.correct?650:1100);
+}
+function finishQuiz(){
+ const total=quiz.list.length,wrong=quiz.wrong.length,right=total-wrong;
+ if(quiz.onDone)quiz.onDone(quiz.wrong);
+ const wrongList=[...new Set(quiz.wrong)];
+ drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回词汇</button>
+  <div class="card" style="text-align:center"><h2 style="justify-content:center">${quiz.title} · 完成</h2>
+   <div class="big-stat" style="color:var(--good);margin:8px 0">${right}/${total}</div>
+   <div class="muted">答对 ${right} 题，错 ${wrong} 题${wrong?'，已记入错题本':'，全对！'}</div></div>
+  ${wrongList.length?`<div class="card"><h2>错题（已加入错题本）</h2>${wrongList.map(k=>{const w=byWord(k);return w?`<div class="phrase"><button class="play" onclick="speak('${w.w.replace(/'/g,"")}')">▶</button><div class="en">${w.w}</div><div class="cn">${w.cn}</div></div>`:`<div class="phrase"><div class="en">${k}</div></div>`;}).join('')}</div>`:''}
+  <button class="btn" onclick="showVocabHub()">完成</button>`);
+ renderTodayBadge();
+}
+function renderTodayBadge(){/* 占位：下次进入今日会刷新 */}
+
+/* 当日检查 */
+function startDailyCheck(){
+ go('vocab');
+ const words=todayNewWords();
+ if(!words.length){drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回</button><div class="card"><h2>当日检查</h2><div class="muted">今天还没有新词或已全部学过。</div></div>`);return;}
+ startQuiz(vocabQuestions(words),'当日检查',
+  k=>{const m=getMistV();m[k]=true;LS.set('mistV',m);const l=getLearned();if(l[k]){l[k].wrong=(l[k].wrong||0)+1;LS.set('learned',l);}},
+  ()=>{LS.set('checkedDay',dayKey());markDayDone();}
+ );
+}
+/* 复习抽查（次日抽查）：第二次错→错题本 */
+function startReview(){
+ go('vocab');
+ const pool=learnedList();
+ if(!pool.length){drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回</button><div class="card"><h2>复习抽查</h2><div class="muted">还没有学过的词。先去学今日新词。</div></div>`);return;}
+ const picks=shuffle(pool).slice(0,Math.min(REVIEW_N,pool.length));
+ startQuiz(vocabQuestions(picks),'复习抽查',
+  k=>{const l=getLearned();if(l[k]){l[k].wrong=(l[k].wrong||0)+1;LS.set('learned',l);if(l[k].wrong>=2){const m=getMistV();m[k]=true;LS.set('mistV',m);}}},
+  (wrongKeys)=>{LS.set('lastReview',dayKey());
+    const pool2=[...new Set(wrongKeys)].map(byWord).filter(Boolean);
+    if(pool2.length){setTimeout(()=>{if(confirm('要把刚才错的 '+pool2.length+' 个词再练一遍吗？（当日复习抽查库）'))startQuiz(vocabQuestions(pool2),'错词再练',null,()=>{});},300);}
+  }
+ );
+}
+/* 错题本 */
+function startMistakes(){
+ go('vocab');
+ const ks=Object.keys(getMistV());const words=ks.map(byWord).filter(Boolean);
+ if(!words.length){drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回</button><div class="card"><h2>错题本</h2><div class="muted">错题本是空的 👍 做错的词会自动收进来，专项攻克。</div></div>`);return;}
+ startQuiz(vocabQuestions(words),'错题本',
+  null,
+  (wrongKeys)=>{const m=getMistV();words.forEach(w=>{if(!wrongKeys.includes(w.w))delete m[w.w];});LS.set('mistV',m);toast('答对的已移出错题本');}
+ );
+}
+/* 分类浏览 */
+let bSeq=[],bIdx=0,bFlip=false;
+function startBrowse(cat){go('vocab');bSeq=VOCAB.filter(v=>v.cat===cat);bIdx=0;renderBrowse();}
+function renderBrowse(){
+ const w=bSeq[bIdx];bFlip=false;
+ drill(`<button class="back-link" onclick="showVocabHub()">‹ 返回词汇</button>
+  <div class="qbar">${w.cat} ${bIdx+1} / ${bSeq.length}</div>
+  <div class="deck"><div class="flip" id="bflip" onclick="bflipCard()">
+   <div class="face front"><span class="pill lv">L${w.lv}</span><div class="en" style="margin-top:10px">${w.w}</div><div class="ph">${w.ph||''}</div>
+     <button class="btn ghost sm" style="margin-top:14px" onclick="event.stopPropagation();speak('${w.w.replace(/'/g,"")}')">▶ 听发音</button></div>
+   <div class="face back"><div class="pos">${w.pos}</div><div class="cn">${w.cn}</div><div class="ex">${w.ex}<br><span style="color:var(--faint)">${w.exCn}</span></div>${w.note?`<div class="note">⚠ ${w.note}</div>`:''}</div>
+  </div></div>
+  <div class="deck-bar"><button class="btn ghost" onclick="bPrev()" ${bIdx===0?'disabled':''}>上一个</button>
+   <button class="btn ghost" onclick="bNext()" ${bIdx===bSeq.length-1?'disabled':''}>下一个</button></div>`);
+}
+function bflipCard(){bFlip=!bFlip;document.getElementById('bflip').classList.toggle('on',bFlip);if(bFlip)speak(bSeq[bIdx].w);}
+function bPrev(){if(bIdx>0){bIdx--;renderBrowse();}}
+function bNext(){if(bIdx<bSeq.length-1){bIdx++;renderBrowse();}}
+
+/* ===== 口语 ===== */
+function renderSpeakList(){
+ const wrap=document.getElementById('speakList');
+ let h='<div class="card"><h2>口语场景跟读</h2><div class="muted">完整对话，适合逐句跟读、录音对比。想真人对话就去「我的」用 Claude 语音私教。</div></div>';
+ SCENARIOS.forEach(s=>{h+=`<div class="list-item" onclick="openScenario('${s.id}')"><div class="ico acc">${s.title.slice(0,1)}</div><div style="flex:1"><div class="t">${s.title}</div><div class="d">${s.desc}</div></div><div class="arrow">›</div></div>`;});
+ h+='<div class="card" style="margin-top:4px"><h2>分阶段话术库</h2><div class="muted">把整段讲解拆成可背诵的框架句，按流程一阶段一阶段练。</div></div>';
+ h+=`<div class="list-item" onclick="openBank('present')"><div class="ico acc">案</div><div style="flex:1"><div class="t">方案讲解话术库</div><div class="d">10 阶段 · 开场→洞察→策略→预算→收尾→应对追问</div></div><div class="arrow">›</div></div>`;
+ h+=`<div class="list-item" onclick="openBank('retro')"><div class="ico acc">盘</div><div style="flex:1"><div class="t">复盘话术库</div><div class="d">9 阶段 · 结果→亮点→不足→根因→经验→下一步</div></div><div class="arrow">›</div></div>`;
+ // 实战脚本（真实案例）
+ h+='<div class="card" style="margin-top:4px"><h2>实战脚本 · 你的真实案例</h2><div class="muted">基于你做过的真实方案/复盘改成英文。逐句 ▶ 跟读 + 录音对比，再用 Claude 语音私教实战。</div></div>';
+ const order={'提案':1,'复盘':2,'公司':3,'方法':4};
+ SCRIPTS.slice().sort((a,b)=>(order[a.type]||9)-(order[b.type]||9)).forEach(s=>{
+  h+=`<div class="list-item" onclick="openScript('${s.id}')"><div class="ico acc">${s.type[0]}</div><div style="flex:1"><div class="t">${s.title}</div><div class="d">${s.type} · ${s.desc}</div></div><div class="arrow">›</div></div>`;
+ });
+ wrap.innerHTML=h;
+}
+function openScript(id){
+ const s=SCRIPTS.find(x=>x.id===id);if(!s)return;
+ document.getElementById('speakList').style.display='none';
+ const d=document.getElementById('speakDetail');d.style.display='block';
+ let h=`<button class="back-link" onclick="closeScenario()">‹ 返回口语</button>
+  <div class="card"><h2>${s.title}</h2><div class="muted"><span class="pill acc">${s.type}</span> ${s.desc} · 约 ${s.dur}　·　点 ▶ 逐句跟读，下方可录音对比</div></div>`;
+ s.sections.forEach(sec=>{
+  h+=`<div class="card"><h2>${sec.stage}</h2>`;
+  sec.lines.forEach(l=>{h+=`<div class="phrase"><button class="play" onclick="speak(\`${l[0].replace(/`/g,'')}\`)">▶</button><div class="en">${l[0]}</div><div class="cn">${l[1]}</div></div>`;});
+  h+=`</div>`;
+ });
+ h+=recorderCard(s.title);
+ d.innerHTML=h;bindRecorder();window.scrollTo(0,0);
+}
+const BANKS={present:['方案讲解话术库',()=>PRESENT],retro:['复盘话术库',()=>RETRO]};
+function phraseRow(it){return `<div class="phrase"><button class="play" onclick="speak(\`${it[0].replace(/`/g,'')}\`)">▶</button><div class="en">${it[0]}</div><div class="cn">${it[1]}</div></div>`;}
+function openBank(key){
+ const [title,getter]=BANKS[key], groups=getter();
+ document.getElementById('speakList').style.display='none';
+ const d=document.getElementById('speakDetail');d.style.display='block';
+ let h=`<button class="back-link" onclick="closeScenario()">‹ 返回口语</button>
+  <div class="card"><h2>${title}</h2><div class="muted">按讲解流程分阶段。点 ▶ 听发音、先背框架句；用录音对比练；「测一测」做选择题（错的进话术错题集）。</div>
+   <button class="btn" style="margin-top:12px" onclick="bankQuizStart('${key}')">测一测（中英互译）</button></div>`;
+ groups.forEach(g=>{h+=`<div class="card"><h2>${g.fn}</h2>`;g.items.forEach(it=>{h+=phraseRow(it);});h+=`</div>`;});
+ h+=recorderCard(title);
+ d.innerHTML=h;bindRecorder();window.scrollTo(0,0);
+}
+let bquiz={};
+function bankQuizStart(key){
+ const [title,getter]=BANKS[key];const pairs=[];getter().forEach(g=>g.items.forEach(it=>pairs.push(it)));
+ bquiz={list:negoQuestions(pairs),i:0,wrong:[],title:title+'测验',key};renderBQuiz();
+}
+function renderBQuiz(){
+ const q=bquiz.list[bquiz.i];
+ document.getElementById('speakDetail').innerHTML=`<button class="back-link" onclick="openBank('${bquiz.key}')">‹ 退出测验</button>
+  <div class="qbar">${bquiz.title} ${bquiz.i+1} / ${bquiz.list.length}</div>
+  <div class="card"><div class="qprompt" style="font-size:17px;line-height:1.4">${q.prompt}</div><div class="qsub">${q.sub||''}</div>
+   <div id="bopts">${q.opts.map((o,i)=>`<button class="opt" onclick="bAnswer(${i})">${o}</button>`).join('')}</div></div>`;
+ window.scrollTo(0,0);
+}
+function bAnswer(i){
+ const q=bquiz.list[bquiz.i],btns=document.querySelectorAll('#bopts .opt'),pick=q.opts[i];
+ btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.correct)b.classList.add('correct');if(j===i&&pick!==q.correct)b.classList.add('wrong');});
+ if(pick===q.correct)speak(q.say);else{bquiz.wrong.push(q.key);const m=getMistN();m[q.key]=true;LS.set('mistN',m);}
+ setTimeout(()=>{bquiz.i++;if(bquiz.i<bquiz.list.length)renderBQuiz();else finishBQuiz();},pick===q.correct?650:1100);
+}
+function finishBQuiz(){
+ const total=bquiz.list.length,wrong=bquiz.wrong.length,right=total-wrong;
+ document.getElementById('speakDetail').innerHTML=`<div class="card" style="text-align:center"><h2 style="justify-content:center">${bquiz.title} · 完成</h2><div class="big-stat" style="color:var(--good);margin:8px 0">${right}/${total}</div><div class="muted">答对 ${right} 题，错 ${wrong} 题${wrong?'，已进话术错题集':'，全对！'}</div></div><button class="btn" onclick="openBank('${bquiz.key}')">返回话术库</button>`;
+}
+function openScenario(id){
+ const s=SCENARIOS.find(x=>x.id===id);
+ document.getElementById('speakList').style.display='none';
+ const d=document.getElementById('speakDetail');d.style.display='block';
+ let html=`<button class="back-link" onclick="closeScenario()">‹ 返回场景列表</button><div class="card"><h2>${s.title}</h2><div class="muted">${s.desc}　·　高亮句是你要开口说的</div></div>`;
+ s.lines.forEach(l=>{const mine=l[3]===1;html+=`<div class="line ${mine?'key':''}"><div class="who">${l[0]}</div><div style="flex:1"><div class="en">${l[1]}</div><div class="cn">${l[2]}</div></div><button class="play" onclick="speak(\`${l[1].replace(/`/g,'')}\`)">▶</button></div>`;});
+ html+=recorderCard('练这一段');
+ d.innerHTML=html;bindRecorder();window.scrollTo(0,0);
+}
+function closeScenario(){document.getElementById('speakDetail').style.display='none';document.getElementById('speakList').style.display='block';}
+
+/* ===== 录音组件（口语 & 谈判共用） ===== */
+function recorderCard(label){
+ return `<div class="card rec-box" style="text-align:center"><h2 style="justify-content:center">录音对比 · ${label}</h2><div class="muted">录下你说的，回放和标准音对照</div>
+  <div class="row" style="gap:10px;margin-top:14px;justify-content:center"><button class="btn" id="recBtn" onclick="toggleRec()">开始录音</button><button class="btn ghost" id="playBtn" onclick="playRec()" style="display:none">回放</button></div></div>`;
+}
+let mediaRec,chunks=[],recUrl=null,recording=false;
+function bindRecorder(){recUrl=null;recording=false;}
+async function toggleRec(){
+ const btn=document.getElementById('recBtn');
+ if(!recording){try{const st=await navigator.mediaDevices.getUserMedia({audio:true});mediaRec=new MediaRecorder(st);chunks=[];mediaRec.ondataavailable=e=>chunks.push(e.data);mediaRec.onstop=()=>{recUrl=URL.createObjectURL(new Blob(chunks));const pb=document.getElementById('playBtn');if(pb)pb.style.display='inline-block';st.getTracks().forEach(t=>t.stop());};mediaRec.start();recording=true;btn.textContent='停止录音';btn.style.background='#B14A2E';}catch(e){toast('需要麦克风权限')}}
+ else{mediaRec.stop();recording=false;btn.textContent='重新录音';btn.style.background='';}
+}
+function playRec(){if(recUrl)new Audio(recUrl).play();}
+
+/* ===== 谈判 ===== */
+function renderNego(){
+ let h=`<div class="card"><h2>谈判话术库</h2><div class="muted">按谈判流程分类。点 ▶ 听发音，用录音对比练，再用「测一测」做选择题（错的进错题集）。</div>
+   <button class="btn" style="margin-top:12px" onclick="startNegoQuiz()">测一测（中英互译）</button></div>`;
+ NEGO.forEach(g=>{h+=`<div class="card"><h2>${g.fn}</h2>`;g.items.forEach(it=>{h+=`<div class="phrase"><button class="play" onclick="speak(\`${it[0].replace(/`/g,'')}\`)">▶</button><div class="en">${it[0]}</div><div class="cn">${it[1]}</div></div>`;});h+=`</div>`;});
+ h+=recorderCard('谈判话术');
+ document.getElementById('negoWrap').innerHTML=h;bindRecorder();
+}
+function startNegoQuiz(){
+ const pairs=[];NEGO.forEach(g=>g.items.forEach(it=>pairs.push(it)));
+ // 用 drillHost 复用？谈判页没有 drillHost，临时把测验渲染进 negoWrap
+ quiz={list:negoQuestions(pairs),i:0,wrong:[],title:'谈判测验',
+  onWrong:k=>{const m=getMistN();m[k]=true;LS.set('mistN',m);},
+  onDone:wrongKeys=>{const cnt=Object.keys(getMistN()).length;if(wrongKeys.length)toast('错的已进谈判错题集（共'+cnt+'）');}};
+ renderNegoQuiz();
+}
+function renderNegoQuiz(){
+ const q=quiz.list[quiz.i];
+ document.getElementById('negoWrap').innerHTML=`<button class="back-link" onclick="renderNego()">‹ 退出测验</button>
+  <div class="qbar">${quiz.title} ${quiz.i+1} / ${quiz.list.length}</div>
+  <div class="card"><div class="qprompt" style="font-size:17px;line-height:1.4">${q.prompt}</div><div class="qsub">${q.sub||''}</div>
+   <div id="opts">${q.opts.map((o,i)=>`<button class="opt" onclick="negoAnswer(${i})">${o}</button>`).join('')}</div></div>`;
+ window.scrollTo(0,0);
+}
+function negoAnswer(i){
+ const q=quiz.list[quiz.i],btns=document.querySelectorAll('#opts .opt'),pick=q.opts[i];
+ btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.correct)b.classList.add('correct');if(j===i&&pick!==q.correct)b.classList.add('wrong');});
+ if(pick===q.correct)speak(q.say);else{quiz.wrong.push(q.key);if(quiz.onWrong)quiz.onWrong(q.key);}
+ setTimeout(()=>{quiz.i++;if(quiz.i<quiz.list.length)renderNegoQuiz();else finishNegoQuiz();},pick===q.correct?650:1100);
+}
+function finishNegoQuiz(){
+ const total=quiz.list.length,wrong=quiz.wrong.length,right=total-wrong;if(quiz.onDone)quiz.onDone(quiz.wrong);
+ document.getElementById('negoWrap').innerHTML=`<div class="card" style="text-align:center"><h2 style="justify-content:center">谈判测验 · 完成</h2><div class="big-stat" style="color:var(--good);margin:8px 0">${right}/${total}</div><div class="muted">答对 ${right} 题，错 ${wrong} 题</div></div><button class="btn" onclick="renderNego()">返回谈判</button>`;
+}
+
+/* ===== 我的 ===== */
+function renderMe(){
+ const c=learnedCount();
+ let map='';MILESTONES.forEach((m,idx)=>{const done=c>=m.words;const cur=curMilestone().key===m.key;map+=`<div class="ms ${done?'done':''} ${cur?'cur':''}"><div class="dot"></div><div style="flex:1"><div class="lab">${m.label}${cur?' · 当前':''}</div><div class="tt">${m.title}</div><div class="tg">${m.target}</div></div></div>`;});
+ let wl='';WRITING.forEach(w=>{wl+=`<div style="margin-bottom:12px"><div style="font-size:13px;font-weight:600;margin-bottom:6px">${w.title}<button class="btn ghost sm" style="float:right" onclick="copyText(\`${w.body.replace(/`/g,'').replace(/\$/g,'')}\`)">复制</button></div><pre class="tpl">${w.body.replace(/</g,'&lt;')}</pre></div>`;});
+ document.getElementById('meWrap').innerHTML=
+  `<div class="stat-grid" style="margin-bottom:14px"><div class="card"><div class="big-stat">${LS.get('streak',0)}</div><div class="muted" style="margin-top:4px">连续天数</div></div><div class="card"><div class="big-stat" style="color:var(--accent)">${c}</div><div class="muted" style="margin-top:4px">掌握词汇</div></div><div class="card"><div class="big-stat" style="color:var(--bad)">${Object.keys(getMistV()).length}</div><div class="muted" style="margin-top:4px">错题</div></div></div>
+   <div class="card"><h2>3 个月学习地图</h2><div class="muted" style="margin-bottom:8px">场景化目标，对标 CEFR A2 → B1</div>${map}</div>
+   <div class="card"><h2>Claude 语音私教指令</h2><div class="muted">复制粘贴到手机 Claude App（建议建 Project 长期用），点麦克风开口说，它扮演各种角色陪你练。</div><button class="btn" style="margin-top:12px" onclick="copyText(TUTOR_PROMPT_TXT)">复制私教指令</button><pre class="tpl" style="margin-top:12px;max-height:180px;overflow:auto">${TUTOR_PROMPT_TXT.replace(/</g,'&lt;')}</pre></div>
+   <div class="card"><h2>书面模板（邮件 / 提案）</h2><div class="muted" style="margin-bottom:12px">先套模板写，再发给 Claude 说「润色成地道商务英语并指出错误」。</div>${wl}</div>
+   <div class="card"><h2>设置</h2>
+     <div class="row between" style="margin-bottom:14px"><span class="muted">每天学新词</span>
+       <span>${[15,20,25,30].map(n=>`<button class="btn ghost sm" style="margin-left:6px;${n===DAILY_NEW?'background:var(--accent);color:#fff;border-color:var(--accent)':''}" onclick="setDailyNew(${n})">${n}</button>`).join('')}</span></div>
+     <div class="row between" style="margin-bottom:12px"><span class="muted">朗读语速</span><input type="range" min="0.6" max="1" step="0.1" value="${rate}" oninput="rate=parseFloat(this.value);LS.set('rate',rate)"></div>
+     <button class="btn ghost" onclick="resetAll()">清空全部进度</button></div>`;
+}
+const TUTOR_PROMPT_TXT=`你是我的「品牌营销行业商务英语」私教，专门帮一位中国营销人（8年品牌/内容营销经验，做过美妆、宠物、保健品，擅长小红书/抖音投放）提升英文口语和谈判。我的英文是初级，常因为开不了口而吃亏。\n\n请这样陪我练（默认用语音，慢速清晰）：\n1. 每次先问我今天想练哪个场景：面试自我介绍 / 周会汇报 / 向老板要预算 / 跟达人谈合作报价 / 给客户做提案 / 方案讲解 / 复盘 / 自由谈判。\n2. 你扮演对应角色（HR、老板、达人、客户）和我一来一回对话，一次只说1-2句，给我开口空间。\n3. 我说完后，先简短回应推进对话，再用【纠正】标出我的语法/用词问题，给出更地道的营销行业说法，并附中文解释。\n4. 多用真实营销术语（ROI、ROAS、种草、KFS、达人矩阵、转化率、获客成本等）的地道英文。\n5. 每轮结束给我一句可以背诵的"金句"。\n6. 全程鼓励，不要一次纠正太多，控制在最影响沟通的2个点。\n\n现在用英文跟我打招呼，并问我今天想练哪个场景。`;
+function copyText(t){if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast('已复制'),()=>fb(t));}else fb(t);function fb(x){const ta=document.createElement('textarea');ta.value=x;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('已复制')}catch(e){toast('请长按手动复制')}ta.remove();}}
+function setDailyNew(n){DAILY_NEW=n;LS.set('dailyNew',n);localStorage.removeItem('me_todaySet');toast('已设为每天 '+n+' 词');renderMe();}
+function resetAll(){if(confirm('确定清空所有进度（含词汇、错题、连续天数）？')){['learned','mistV','mistN','todaySet','streak','streakDay','checkedDay','learnedDay','lastReview'].forEach(k=>localStorage.removeItem('me_'+k));toast('已清空');renderMe();}}
+
+/* ===== init ===== */
+renderToday();renderSpeakList();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
