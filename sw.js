@@ -1,5 +1,5 @@
 // 简单离线缓存：首次打开后即可离线使用
-const CACHE = 'mkt-en-v5';
+const CACHE = 'mkt-en-v6';
 const ASSETS = ['./', './index.html', './data.js', './vocab2.js', './scripts.js', './manifest.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

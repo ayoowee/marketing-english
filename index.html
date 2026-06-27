@@ -556,11 +556,28 @@ function renderMe(){
      <div class="row between" style="margin-bottom:14px"><span class="muted">每天学新词</span>
        <span>${[15,20,25,30].map(n=>`<button class="btn ghost sm" style="margin-left:6px;${n===DAILY_NEW?'background:var(--accent);color:#fff;border-color:var(--accent)':''}" onclick="setDailyNew(${n})">${n}</button>`).join('')}</span></div>
      <div class="row between" style="margin-bottom:12px"><span class="muted">朗读语速</span><input type="range" min="0.6" max="1" step="0.1" value="${rate}" oninput="rate=parseFloat(this.value);LS.set('rate',rate)"></div>
+     <div class="muted" style="margin-bottom:8px;font-size:12px">备份/搬家：导出一串"备份码"存好，换设备或清数据后导入即可恢复进度</div>
+     <button class="btn ghost" onclick="exportProgress()" style="margin-bottom:8px">导出进度（备份码）</button>
+     <button class="btn ghost" onclick="importProgress()" style="margin-bottom:8px">导入进度</button>
      <button class="btn ghost" onclick="resetAll()">清空全部进度</button></div>`;
 }
 const TUTOR_PROMPT_TXT=`你是我的「品牌营销行业商务英语」私教，专门帮一位中国营销人（8年品牌/内容营销经验，做过美妆、宠物、保健品，擅长小红书/抖音投放）提升英文口语和谈判。我的英文是初级，常因为开不了口而吃亏。\n\n请这样陪我练（默认用语音，慢速清晰）：\n1. 每次先问我今天想练哪个场景：面试自我介绍 / 周会汇报 / 向老板要预算 / 跟达人谈合作报价 / 给客户做提案 / 方案讲解 / 复盘 / 自由谈判。\n2. 你扮演对应角色（HR、老板、达人、客户）和我一来一回对话，一次只说1-2句，给我开口空间。\n3. 我说完后，先简短回应推进对话，再用【纠正】标出我的语法/用词问题，给出更地道的营销行业说法，并附中文解释。\n4. 多用真实营销术语（ROI、ROAS、种草、KFS、达人矩阵、转化率、获客成本等）的地道英文。\n5. 每轮结束给我一句可以背诵的"金句"。\n6. 全程鼓励，不要一次纠正太多，控制在最影响沟通的2个点。\n\n现在用英文跟我打招呼，并问我今天想练哪个场景。`;
 function copyText(t){if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast('已复制'),()=>fb(t));}else fb(t);function fb(x){const ta=document.createElement('textarea');ta.value=x;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('已复制')}catch(e){toast('请长按手动复制')}ta.remove();}}
 function setDailyNew(n){DAILY_NEW=n;LS.set('dailyNew',n);localStorage.removeItem('me_todaySet');toast('已设为每天 '+n+' 词');renderMe();}
+function exportProgress(){
+ const data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('me_'))data[k]=localStorage.getItem(k);}
+ const code=btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+ copyText(code);
+ prompt('备份码已复制。请长按全选复制，粘贴到备忘录等地方存好：',code);
+}
+function importProgress(){
+ const code=prompt('粘贴你的备份码（导入会覆盖当前进度）：');
+ if(!code)return;
+ try{const data=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  Object.keys(data).forEach(k=>localStorage.setItem(k,data[k]));
+  toast('导入成功，正在刷新…');setTimeout(()=>location.reload(),900);
+ }catch(e){toast('备份码无效，请检查是否完整')}
+}
 function resetAll(){if(confirm('确定清空所有进度（含词汇、错题、连续天数）？')){['learned','mistV','mistN','todaySet','streak','streakDay','checkedDay','learnedDay','lastReview'].forEach(k=>localStorage.removeItem('me_'+k));toast('已清空');renderMe();}}
 
 /* ===== init ===== */
